@@ -70,7 +70,7 @@ body {
 main {
   display: block;
   margin: 10px auto 0 auto;
-  width: max(min(calc(100vw - 20px), calc(100vh - 105px)), 400px);
+  width: min(calc(100vw - 20px), calc(100vh - 105px));
 }
 
 .game-description {
