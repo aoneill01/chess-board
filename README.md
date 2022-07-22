@@ -1,2 +1,3 @@
 # chess-board
-Created with CodeSandbox
+
+Simple chess board displaying random games from Chess.com.

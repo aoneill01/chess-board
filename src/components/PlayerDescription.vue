@@ -46,13 +46,15 @@ export default {
           this.avatar = data.avatar;
           this.url = data.url;
           return;
-        } catch {}
+        } catch {
+          // Do nothing
+        }
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     },
   },
 };
-</script> 
+</script>
 
 <style scoped>
 .player {
