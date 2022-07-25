@@ -11,7 +11,7 @@ import {
   BlackKnight,
   BlackBishop,
   BlackQueen,
-  BlackKing
+  BlackKing,
 } from "../components/pieces";
 
 export function positionsForPgn(pgn) {
@@ -54,4 +54,25 @@ export function componentForPiece(piece) {
     default:
       throw Error("Unexpected piece " + piece);
   }
+}
+
+export function locationFor(square) {
+  const [file, rank] = square.split("");
+  const rankIndex = parseInt(rank, 10) - 1;
+  const fileIndex = file.charCodeAt(0) - "a".charCodeAt("a");
+  const squareSize = 12;
+  const margin = 2;
+  return {
+    x: fileIndex * squareSize + margin,
+    y: (7 - rankIndex) * squareSize + margin,
+  };
+}
+
+export function distanceBetween(square1, square2) {
+  const location1 = locationFor(square1);
+  const location2 = locationFor(square2);
+  return Math.sqrt(
+    Math.pow(location1.x - location2.x, 2) +
+      Math.pow(location1.y - location2.y, 2)
+  );
 }
