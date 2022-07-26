@@ -15,15 +15,9 @@ import {
   BlackKing,
 } from "../components/pieces";
 
-export function positionsForPgn(pgn) {
+export function detailsForPgn(pgn) {
   const database = kokopu.pgnRead(pgn);
-  const game = database.game(0);
-  const mainVariation = game.mainVariation();
-  const positions = [mainVariation.first().positionBefore()];
-  for (let node = mainVariation.first(); node; node = node.next()) {
-    positions.push(node.position());
-  }
-  return { positions, details: game };
+  return database.game(0);
 }
 
 export function componentForPiece(piece) {
@@ -79,12 +73,11 @@ export function distanceBetween(square1, square2) {
 }
 
 export function animateGame(pgn, pieces, refs, onComplete) {
-  // TODO: promotions
-
   if (!pgn) return;
 
   const timeline = gsap.timeline();
   const map = {};
+
   // Reorder the pieces
   pieces.sort((a, b) => a.originalOrder - b.originalOrder);
   for (let i in pieces) {
@@ -93,22 +86,25 @@ export function animateGame(pgn, pieces, refs, onComplete) {
     map[piece.square] = { el: ref.$el, piece };
     // Reset to default location
     timeline.set(ref.$el, { ...locationFor(piece.square), opacity: 1 });
+    // Reset promoted pieces
+    if (piece.square.endsWith("2")) piece.piece = "wp";
+    if (piece.square.endsWith("7")) piece.piece = "bp";
   }
 
   const database = kokopu.pgnRead(pgn);
   const game = database.game(0);
   const mainVariation = game.mainVariation();
-  let labelIndex = 0;
+  const labelGenerator = createLabelGenerator();
+
   // Iterate over every move
   for (let node = mainVariation.first(); node; node = node.next()) {
     const md = node._info.moveDescriptor;
     const from = md.from();
     const to = md.to();
-    const rookFrom = md.isCastling() && md.rookFrom();
-    const rookTo = md.isCastling() && md.rookTo();
+
     if (map[from]) {
       const piece = map[from].piece;
-      const label = `l${labelIndex}`;
+      const label = labelGenerator.next().value;
       // Pick up the piece
       timeline.to(map[from].el, {
         scale: 1.1,
@@ -125,9 +121,16 @@ export function animateGame(pgn, pieces, refs, onComplete) {
       });
 
       timeline.addLabel(label);
-      if (map[to]) {
+      let captureSquare = to;
+      if (md.isEnPassant()) captureSquare = md.enPassantSquare();
+      let handlePromotion = () => {};
+      if (md.isPromotion()) {
+        handlePromotion = () => (piece.piece = md.coloredPromotion());
+      }
+
+      if (map[captureSquare]) {
         // Hide captured pieces
-        timeline.to(map[to].el, { opacity: 0, duration: 0.3 }, label);
+        timeline.to(map[to].el, { opacity: 0, duration: 0.3 }, `${label}+=0.3`);
       }
 
       // Move the current piece
@@ -139,27 +142,42 @@ export function animateGame(pgn, pieces, refs, onComplete) {
         },
         label
       );
+
       // Drop the piece
       timeline.to(map[from].el, {
         scale: 1,
         transformOrigin: "50%",
         duration: 0.2,
+        onComplete: handlePromotion,
       });
+
       // Handle castling
-      if (map[rookFrom]) {
+      if (md.isCastling()) {
+        const rookFrom = md.rookFrom();
+        const rookTo = md.rookTo();
+
         timeline.to(
           map[rookFrom].el,
           { ...locationFor(rookTo), duration: 0.6 },
           label
         );
+
         map[rookTo] = map[rookFrom];
         delete map[rookFrom];
       }
+
       map[to] = map[from];
       delete map[from];
-      labelIndex++;
     }
   }
 
   timeline.to({}, { onComplete: () => onComplete(), duration: 2 });
+}
+
+function* createLabelGenerator() {
+  let labelIndex = 0;
+
+  while (true) {
+    yield `l${labelIndex++}`;
+  }
 }

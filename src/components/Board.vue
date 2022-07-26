@@ -4,33 +4,33 @@
     <rect x="1.5" y="1.5" width="97" height="97" fill="#edeed1" rx=".6" />
     <rect
       v-for="square in squares"
-      :key="square.row * 8 + square.col"
-      :x="2.1 + 12 * (square.col - 1)"
-      :y="2.1 + 12 * (square.row - 1)"
+      :key="square.rank * 8 + square.file"
+      :x="2.1 + 12 * (square.file - 1)"
+      :y="2.1 + 12 * (square.rank - 1)"
       :width="11.8"
       :height="11.8"
       :fill="square.isWhite ? lightColor : darkColor"
       rx=".5"
     />
     <text
-      v-for="(col, i) of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']"
-      :key="col"
+      v-for="(file, i) of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']"
+      :key="'file' + file"
       :fill="i % 2 === 0 ? lightColor : darkColor"
       :x="11.5 + 12 * i"
       y="97"
       font-size="3px"
     >
-      {{ col }}
+      {{ file }}
     </text>
     <text
-      v-for="(row, i) of ['1', '2', '3', '4', '5', '6', '7', '8'].reverse()"
-      :key="'sq' + row"
+      v-for="(rank, i) of ['1', '2', '3', '4', '5', '6', '7', '8'].reverse()"
+      :key="'rank' + rank"
       :fill="i % 2 === 0 ? darkColor : lightColor"
       :y="5 + 12 * i"
       x="2.5"
       font-size="3px"
     >
-      {{ row }}
+      {{ rank }}
     </text>
 
     <Piece
@@ -54,13 +54,12 @@ export default {
   },
   data() {
     const squares = [];
-    for (let row = 1; row <= 8; row++) {
-      for (let col = 1; col <= 8; col++) {
+    for (let rank = 1; rank <= 8; rank++) {
+      for (let file = 1; file <= 8; file++) {
         squares.push({
-          row,
-          col,
-          isWhite: (row + col) % 2 === 0,
-          isHovered: false,
+          rank,
+          file,
+          isWhite: (rank + file) % 2 === 0,
         });
       }
     }

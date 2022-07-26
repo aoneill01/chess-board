@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { positionsForPgn } from "./helpers/positionHelpers";
+import { detailsForPgn } from "./helpers/positionHelpers";
 import { getRandomGMGame } from "./helpers/chessComClient";
 import Board from "./components/Board";
 import Players from "./components/Players";
@@ -31,7 +31,7 @@ export default {
     async newGame() {
       try {
         this.game = await getRandomGMGame();
-        const { details } = positionsForPgn(this.game.pgn);
+        const details = detailsForPgn(this.game.pgn);
         this.pgn = this.game.pgn;
         this.details = details;
       } catch {
