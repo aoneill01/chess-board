@@ -33,23 +33,24 @@
       {{ row }}
     </text>
 
-    <component
-      v-for="{ position, piece } of pieces"
-      :is="componentForPiece(piece)"
-      :position="position"
-      :key="position + piece"
+    <Piece
+      v-for="{ square, piece, key } of pieces"
+      :piece="piece"
+      :position="square"
+      :key="key"
+      ref="pRef"
     />
   </svg>
 </template>
 
 <script>
-import * as pieces from "./pieces";
-import { componentForPiece } from "../helpers/positionHelpers";
+import Piece from "./pieces/Piece.vue";
+import { componentForPiece, animateGame } from "../helpers/positionHelpers";
 
 export default {
-  props: ["position"],
+  props: ["pgn", "onComplete"],
   components: {
-    ...pieces,
+    Piece,
   },
   data() {
     const squares = [];
@@ -65,6 +66,40 @@ export default {
     }
     return {
       squares,
+      pieces: [
+        { square: "a1", piece: "wr", key: "w1", originalOrder: 0 },
+        { square: "b1", piece: "wn", key: "w2", originalOrder: 1 },
+        { square: "c1", piece: "wb", key: "w3", originalOrder: 2 },
+        { square: "d1", piece: "wq", key: "w4", originalOrder: 3 },
+        { square: "e1", piece: "wk", key: "w5", originalOrder: 4 },
+        { square: "f1", piece: "wb", key: "w6", originalOrder: 5 },
+        { square: "g1", piece: "wn", key: "w7", originalOrder: 6 },
+        { square: "h1", piece: "wr", key: "w8", originalOrder: 7 },
+        { square: "a2", piece: "wp", key: "w9", originalOrder: 8 },
+        { square: "b2", piece: "wp", key: "w10", originalOrder: 9 },
+        { square: "c2", piece: "wp", key: "w11", originalOrder: 10 },
+        { square: "d2", piece: "wp", key: "w12", originalOrder: 11 },
+        { square: "e2", piece: "wp", key: "w13", originalOrder: 12 },
+        { square: "f2", piece: "wp", key: "w14", originalOrder: 13 },
+        { square: "g2", piece: "wp", key: "w15", originalOrder: 14 },
+        { square: "h2", piece: "wp", key: "w16", originalOrder: 15 },
+        { square: "a8", piece: "br", key: "b1", originalOrder: 16 },
+        { square: "b8", piece: "bn", key: "b2", originalOrder: 17 },
+        { square: "c8", piece: "bb", key: "b3", originalOrder: 18 },
+        { square: "d8", piece: "bq", key: "b4", originalOrder: 19 },
+        { square: "e8", piece: "bk", key: "b5", originalOrder: 20 },
+        { square: "f8", piece: "bb", key: "b6", originalOrder: 21 },
+        { square: "g8", piece: "bn", key: "b7", originalOrder: 22 },
+        { square: "h8", piece: "br", key: "b8", originalOrder: 23 },
+        { square: "a7", piece: "bp", key: "b9", originalOrder: 24 },
+        { square: "b7", piece: "bp", key: "b10", originalOrder: 25 },
+        { square: "c7", piece: "bp", key: "b11", originalOrder: 26 },
+        { square: "d7", piece: "bp", key: "b12", originalOrder: 27 },
+        { square: "e7", piece: "bp", key: "b13", originalOrder: 28 },
+        { square: "f7", piece: "bp", key: "b14", originalOrder: 29 },
+        { square: "g7", piece: "bp", key: "b15", originalOrder: 30 },
+        { square: "h7", piece: "bp", key: "b16", originalOrder: 31 },
+      ],
       lightColor: "#edeed1",
       darkColor: "#779952",
     };
@@ -72,19 +107,18 @@ export default {
   methods: {
     componentForPiece,
   },
-  computed: {
-    pieces() {
-      const result = [];
-      if (!this.position) return result;
-      for (let row = 1; row <= 8; row++) {
-        for (const col of ["a", "b", "c", "d", "e", "f", "g", "h"]) {
-          const position = `${col}${row}`;
-          const piece = this.position.square(position);
-          if (piece === "-") continue;
-          result.push({ position, piece });
+  watch: {
+    pgn: {
+      immediate: true,
+      handler: function () {
+        try {
+          animateGame(this.pgn, this.pieces, this.$refs, () =>
+            this.$emit("complete")
+          );
+        } catch {
+          this.$emit("complete");
         }
-      }
-      return result;
+      },
     },
   },
 };

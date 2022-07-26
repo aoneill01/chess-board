@@ -1,7 +1,7 @@
 <template>
   <main>
     <Players :game="game" />
-    <Board :position="positions[positionIndex]" />
+    <Board :pgn="pgn" @complete="newGame" />
     <div class="game-description" v-if="game">
       <div>{{ details.dateAsString() }}</div>
       <div class="result">{{ details.result() }}</div>
@@ -18,9 +18,7 @@ import Players from "./components/Players";
 export default {
   data() {
     return {
-      positions: [],
-      positionIndex: 0,
-      intervalId: null,
+      pgn: null,
       game: null,
       details: null,
     };
@@ -31,30 +29,18 @@ export default {
   },
   methods: {
     async newGame() {
-      this.game = await getRandomGMGame();
-      const { positions, details } = positionsForPgn(this.game.pgn);
-      this.positions = positions;
-      this.details = details;
-
-      this.intervalId = setInterval(() => {
-        if (this.positionIndex < this.positions.length - 1) {
-          this.positionIndex++;
-        } else {
-          clearInterval(this.intervalId);
-          this.positions = [];
-          this.positionIndex = 0;
-          this.game = null;
-          this.details = null;
-          this.newGame();
-        }
-      }, 1000);
+      try {
+        this.game = await getRandomGMGame();
+        const { details } = positionsForPgn(this.game.pgn);
+        this.pgn = this.game.pgn;
+        this.details = details;
+      } catch {
+        this.newGame();
+      }
     },
   },
   async created() {
     await this.newGame();
-  },
-  beforeDestroy() {
-    clearInterval(this.intervalId);
   },
 };
 </script>

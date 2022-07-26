@@ -1,15 +1,15 @@
 <template>
   <svg viewBox="0 0 3.175 3.175" xmlns="http://www.w3.org/2000/svg">
-    <WhitePawnGroup />
+    <WhitePawn />
   </svg>
 </template>
 
 <script>
-import WhitePawnGroup from "./WhitePawnGroup";
+import WhitePawn from "./WhitePawn";
 
 export default {
   components: {
-    WhitePawnGroup,
+    WhitePawn,
   },
 };
 </script>
